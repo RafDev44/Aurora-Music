@@ -3,6 +3,7 @@ export interface Track {
   title: string
   artist: string
   album: string
+  albumartist?: string
   duration: number
   source: string
   artwork?: string
@@ -11,6 +12,7 @@ export interface Track {
   addedAt?: string
   lrcPath?: string
   normalizationGain?: number
+  metadataRead?: boolean
 }
 
 export type RepeatMode = 'off' | 'all' | 'one'

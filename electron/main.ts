@@ -1,17 +1,15 @@
 import { app, BrowserWindow, dialog, ipcMain, net, protocol } from 'electron'
-import { createRequire } from 'node:module'
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
+import { parseFile } from 'music-metadata'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const require = createRequire(import.meta.url)
-const { parseFile } = require('music-metadata') as typeof import('music-metadata')
 const isDevelopment = !app.isPackaged
 const supportedExtensions = new Set(['.mp3', '.flac', '.wav', '.aac', '.m4a', '.ogg'])
 protocol.registerSchemesAsPrivileged([{ scheme: 'aurora-media', privileges: { secure: true, supportFetchAPI: true, stream: true, corsEnabled: true } }])
 
-interface LibraryTrack { id: string; title: string; artist: string; album: string; duration: number; source: string; sourcePath: string; artwork?: string; genre?: string; addedAt: string; lrcPath?: string; normalizationGain?: number }
+interface LibraryTrack { id: string; title: string; artist: string; album: string; albumartist?: string; duration: number; source: string; sourcePath: string; artwork?: string; genre?: string; addedAt: string; lrcPath?: string; normalizationGain?: number; metadataRead?: boolean }
 interface StoredPlaylist { id: string; name: string; trackIds: string[]; createdAt: string; updatedAt: string; artwork?: string }
 
 const libraryPath = () => path.join(app.getPath('userData'), 'library.json')
@@ -31,19 +29,41 @@ async function collectAudioFiles(folder: string): Promise<string[]> {
 
 async function readTrack(filePath: string): Promise<LibraryTrack> {
   const filename = path.basename(filePath, path.extname(filePath))
-  const fallback: LibraryTrack = { id: Buffer.from(filePath).toString('base64url'), title: filename, artist: 'Unknown artist', album: 'Unknown album', duration: 0, source: mediaUrl(filePath), sourcePath: filePath, addedAt: new Date().toISOString(), lrcPath: await findLrc(filePath) }
+  const fallback: LibraryTrack = { id: Buffer.from(filePath).toString('base64url'), title: filename, artist: 'Unknown artist', album: 'Unknown album', duration: 0, source: mediaUrl(filePath), sourcePath: filePath, addedAt: new Date().toISOString(), lrcPath: await findLrc(filePath), metadataRead: false }
   try {
     const metadata = await parseFile(filePath, { duration: true, skipCovers: false })
     const picture = metadata.common.picture?.[0]
     const artwork = picture ? `data:${picture.format};base64,${Buffer.from(picture.data).toString('base64')}` : undefined
     const replayGain = (metadata.common as typeof metadata.common & { replaygain?: { trackGain?: number } }).replaygain?.trackGain
     const normalizationGain = typeof replayGain === 'number' ? Math.max(0.5, Math.min(1.5, Math.pow(10, replayGain / 20))) : 1
-    return { ...fallback, title: metadata.common.title || filename, artist: metadata.common.artist || 'Unknown artist', album: metadata.common.album || 'Unknown album', duration: metadata.format.duration || 0, artwork, genre: metadata.common.genre?.[0], normalizationGain }
-  } catch { return fallback }
+    return { ...fallback, title: metadata.common.title || filename, artist: metadata.common.artist || 'Unknown artist', album: metadata.common.album || 'Unknown album', albumartist: metadata.common.albumartist, duration: metadata.format.duration || 0, artwork, genre: metadata.common.genre?.[0], normalizationGain, metadataRead: true }
+  } catch (error) {
+    console.error(`[Aurora] Failed to read metadata for ${filePath}`, error)
+    return fallback
+  }
 }
 
 async function loadLibrary(): Promise<LibraryTrack[]> {
-  try { return Promise.all((JSON.parse(await fs.readFile(libraryPath(), 'utf8')) as LibraryTrack[]).map(async (track) => ({ ...track, source: mediaUrl(track.sourcePath), lrcPath: track.lrcPath ?? await findLrc(track.sourcePath) }))) } catch { return [] }
+  try {
+    const stored = JSON.parse(await fs.readFile(libraryPath(), 'utf8')) as LibraryTrack[]
+    let refreshedAny = false
+    const library = await Promise.all(stored.map(async (track) => {
+      const normalized = { ...track, source: mediaUrl(track.sourcePath), lrcPath: track.lrcPath ?? await findLrc(track.sourcePath) }
+      if (normalized.metadataRead === true) return normalized
+
+      const refreshed = await readTrack(normalized.sourcePath)
+      refreshedAny = true
+      return {
+        ...normalized,
+        ...refreshed,
+        id: normalized.id,
+        addedAt: normalized.addedAt,
+        artwork: normalized.artwork ?? refreshed.artwork,
+      }
+    }))
+    if (refreshedAny) await saveLibrary(library)
+    return library
+  } catch { return [] }
 }
 
 async function saveLibrary(library: LibraryTrack[]): Promise<void> { await fs.writeFile(libraryPath(), JSON.stringify(library), 'utf8') }
