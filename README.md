@@ -21,7 +21,6 @@ Unlike streaming-focused players, Aurora is built around your personal music col
 - FLAC support
 - MP3 support
 - WAV support
-- Gapless playback
 - Smooth Crossfade
 - Shuffle & Repeat
 - Queue Management
