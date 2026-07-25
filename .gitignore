@@ -1,5 +1,9 @@
-node_modules
-dist
-dist-electron
-.DS_Store
+node_modules/
+dist/
+build/
+out/
+.cache/
+.vscode/
+.env
+.env.*
 *.log
