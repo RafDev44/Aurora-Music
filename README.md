@@ -191,6 +191,7 @@ Built with:
 **Mohammed Rafaz**
 
 Made with ❤️ for music lovers.
+This Project not fully developed my me I vibe codded it mostly :/
 
 ---
 
