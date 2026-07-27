@@ -24,6 +24,7 @@ Unlike streaming-focused players, Aurora is built around your personal music col
 - Smooth Crossfade
 - Shuffle & Repeat
 - Queue Management
+- Stream Songs From Drive(Cloud)
 
 ### 🎨 Beautiful Interface
 - Modern glassmorphism design
@@ -51,7 +52,7 @@ Unlike streaming-focused players, Aurora is built around your personal music col
 - Embedded lyrics support
 - Online lyrics lookup
 - Local lyrics cache
-- Synced LRC support *(planned)*
+- Synced LRC support
 
 ### ⚡ Performance
 - Fast startup
@@ -148,7 +149,8 @@ npm run build
 - [x] Metadata Reader
 - [x] Embedded Album Art
 - [x] Modern UI
-- [ ] Synced Lyrics
+- [x] Synced Lyrics
+- [x] Cloud Storage
 - [ ] Equalizer
 - [ ] Audio Visualizer
 - [ ] Mini Player
