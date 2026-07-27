@@ -103,7 +103,17 @@ Aurora Player
 
 ## 📸 Screenshots
 
-Coming Soon
+### Home
+![Home Screen](src/Home.png)
+
+### Playlist
+![Playlist Screen](src/Playlist.png)
+
+### Settings
+![Settings Screen](src/Settings.png)
+
+### Lyrics
+![Lyrics Screen](src/Lyrics.png)
 
 ---
 
