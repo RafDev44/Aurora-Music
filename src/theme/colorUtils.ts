@@ -84,6 +84,17 @@ export function shiftLightness(hex: string, delta: number): string {
   return rgbToHex(hslToRgb({ ...hsl, l: Math.max(0, Math.min(1, hsl.l + delta)) }))
 }
 
+export function shiftHue(hex: string, degrees: number, lightnessDelta = 0): string {
+  const hsl = rgbToHsl(hexToRgb(hex))
+  return rgbToHex(
+    hslToRgb({
+      ...hsl,
+      h: (hsl.h + degrees + 360) % 360,
+      l: Math.max(0, Math.min(1, hsl.l + lightnessDelta)),
+    }),
+  )
+}
+
 export function withAlpha(hex: string, alpha: number): string {
   const { r, g, b } = hexToRgb(hex)
   return `rgba(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)}, ${alpha})`

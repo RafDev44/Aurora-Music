@@ -1,8 +1,19 @@
 import { motion } from 'framer-motion'
-import { Clock3, Disc3, FolderOpen, Music2, Play, Search, SlidersHorizontal } from 'lucide-react'
+import {
+  Cloud,
+  Clock3,
+  Disc3,
+  FolderOpen,
+  Music2,
+  Play,
+  Search,
+  SlidersHorizontal,
+} from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { usePlayer } from '../hooks/usePlayer'
 import type { Track } from '../types/music'
+import { LibrarySkeleton } from './LibrarySkeleton'
+import { AuroraShader } from './AuroraShader'
 
 const formatDuration = (duration: number) =>
   `${Math.floor(duration / 60)}:${String(Math.floor(duration % 60)).padStart(2, '0')}`
@@ -12,16 +23,22 @@ export function LibraryPage({
   onAddFolder,
   onEditArtwork,
   focusRequest = 0,
+  isLibraryReady = true,
+  isScanning = false,
 }: {
   tracks: Track[]
   onAddFolder: () => void
   onEditArtwork: (trackId: string) => void
   focusRequest?: number
+  isLibraryReady?: boolean
+  isScanning?: boolean
 }) {
   const player = usePlayer()
   const [query, setQuery] = useState('')
   const [genre, setGenre] = useState('All genres')
-  const [sort, setSort] = useState<'title' | 'artist' | 'album' | 'recent'>('title')
+  const [sort, setSort] = useState<'title' | 'artist' | 'album' | 'recent'>(
+    'title',
+  )
   const searchInput = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -30,7 +47,13 @@ export function LibraryPage({
 
   const genres = useMemo(
     () =>
-      [...new Set(tracks.map((track) => track.genre).filter((item): item is string => Boolean(item)))].sort(),
+      [
+        ...new Set(
+          tracks
+            .map((track) => track.genre)
+            .filter((item): item is string => Boolean(item)),
+        ),
+      ].sort(),
     [tracks],
   )
 
@@ -41,26 +64,35 @@ export function LibraryPage({
         (track) =>
           (genre === 'All genres' || track.genre === genre) &&
           (!needle ||
-            [track.title, track.artist, track.album, track.genre].some((value) =>
-              value?.toLocaleLowerCase().includes(needle),
+            [track.title, track.artist, track.album, track.genre].some(
+              (value) => value?.toLocaleLowerCase().includes(needle),
             )),
       )
       .sort((left, right) => {
-        if (sort === 'recent') return (right.addedAt ?? '').localeCompare(left.addedAt ?? '')
+        if (sort === 'recent')
+          return (right.addedAt ?? '').localeCompare(left.addedAt ?? '')
         return left[sort].localeCompare(right[sort])
       })
   }, [genre, query, sort, tracks])
 
+  if (!isLibraryReady || isScanning) return <LibrarySkeleton />
   if (!tracks.length) return <EmptyLibrary onAddFolder={onAddFolder} />
 
   return (
     <div className="page">
+      <AuroraShader
+        className="library-page-aurora"
+        amplitude={1}
+        blend={0.72}
+        speed={0.34}
+      />
       <header className="page-header">
         <div>
           <p className="eyebrow">Your collection</p>
           <h1 className="page-title text-gradient">Library</h1>
           <p className="page-subtitle">
-            Search, sort, play, drag into playlists, or right-click a track to update its artwork.
+            Search, sort, play, drag into playlists, or right-click a track to
+            update its artwork.
           </p>
         </div>
         <button className="btn-primary" onClick={onAddFolder}>
@@ -82,6 +114,7 @@ export function LibraryPage({
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search title, artist, album, or genre"
+            aria-label="Search library"
           />
           <span className="kbd">/</span>
         </label>
@@ -128,9 +161,15 @@ export function LibraryPage({
               draggable
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: Math.min(index * 0.015, 0.24), duration: 0.28 }}
+              transition={{
+                delay: Math.min(index * 0.015, 0.24),
+                duration: 0.28,
+              }}
               onDragStartCapture={(event) =>
-                event.dataTransfer.setData('application/x-aurora-track', track.id)
+                event.dataTransfer.setData(
+                  'application/x-aurora-track',
+                  track.id,
+                )
               }
               onContextMenu={(event) => {
                 event.preventDefault()
@@ -143,7 +182,15 @@ export function LibraryPage({
             >
               <span className="flex min-w-0 items-center gap-3">
                 <span className="art h-12 w-12 shrink-0">
-                  {track.artwork ? <img className="h-full w-full object-cover" src={track.artwork} alt="" /> : <Music2 size={18} />}
+                  {track.artwork ? (
+                    <img
+                      className="h-full w-full object-cover"
+                      src={track.artwork}
+                      alt=""
+                    />
+                  ) : (
+                    <Music2 size={18} />
+                  )}
                   <span className="absolute inset-0 hidden place-items-center bg-[var(--glass-strong)] backdrop-blur-sm group-hover:grid">
                     <Play size={17} fill="var(--accent-foreground)" />
                   </span>
@@ -151,21 +198,48 @@ export function LibraryPage({
                 <span className="min-w-0">
                   <span className="flex items-center gap-2 truncate text-sm font-semibold text-text-primary">
                     {track.title}
-                    {isActive && <span className="eq-bars"><span /><span /><span /></span>}
+                    {track.sourceKind === 'drive' && (
+                      <Cloud
+                        size={13}
+                        className="shrink-0 text-accent-light"
+                        aria-label="Google Drive track"
+                      />
+                    )}
+                    {isActive && (
+                      <span className="eq-bars">
+                        <span />
+                        <span />
+                        <span />
+                      </span>
+                    )}
                   </span>
-                  <span className="block truncate text-xs text-text-tertiary">{track.artist}</span>
+                  <span className="block truncate text-xs text-text-tertiary">
+                    {track.artist}
+                  </span>
+                  {track.sourceKind === 'drive' && (
+                    <span className="block truncate text-[10px] font-medium text-accent-light">
+                      Google Drive
+                    </span>
+                  )}
                 </span>
               </span>
-              <span className="hidden truncate text-sm text-text-secondary lg:block">{track.album}</span>
-              <span className="hidden truncate text-sm text-text-tertiary lg:block">{track.genre || 'Unsorted'}</span>
-              <span className="text-right text-xs tabular-nums text-text-muted">{formatDuration(track.duration)}</span>
+              <span className="hidden truncate text-sm text-text-secondary lg:block">
+                {track.album}
+              </span>
+              <span className="hidden truncate text-sm text-text-tertiary lg:block">
+                {track.genre || 'Unsorted'}
+              </span>
+              <span className="text-right text-xs tabular-nums text-text-muted">
+                {formatDuration(track.duration)}
+              </span>
             </motion.button>
           )
         })}
       </div>
 
       <p className="mt-4 text-xs text-text-muted">
-        {visibleTracks.length} of {tracks.length} songs. Click to play, drag to a playlist, right-click to set cover art.
+        {visibleTracks.length} of {tracks.length} songs. Click to play, drag to
+        a playlist, right-click to set cover art.
       </p>
     </div>
   )
@@ -174,7 +248,11 @@ export function LibraryPage({
 function EmptyLibrary({ onAddFolder }: { onAddFolder: () => void }) {
   return (
     <div className="empty-state">
-      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45 }}
+      >
         <div className="empty-icon">
           <Disc3 size={42} strokeWidth={1.8} />
         </div>
@@ -184,7 +262,8 @@ function EmptyLibrary({ onAddFolder }: { onAddFolder: () => void }) {
         </div>
         <h1 className="page-title text-gradient">Build your library.</h1>
         <p className="page-subtitle mx-auto">
-          Select a folder and Aurora will find MP3, FLAC, WAV, AAC, M4A, and OGG files with metadata and embedded artwork.
+          Select a folder and Aurora will find MP3, FLAC, WAV, AAC, M4A, and OGG
+          files with metadata and embedded artwork.
         </p>
         <button onClick={onAddFolder} className="btn-primary mt-7">
           <FolderOpen size={16} />

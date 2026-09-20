@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { Disc3, ListMusic, Pencil, Play, Trash2 } from 'lucide-react'
+import { Cloud, Disc3, ListMusic, Pencil, Play, Trash2 } from 'lucide-react'
 import { usePlayer } from '../hooks/usePlayer'
 import type { Playlist, Track } from '../types/music'
 
@@ -36,7 +36,7 @@ export function PlaylistPage({
         className="page-header"
       >
         <div className="flex min-w-0 items-end gap-6">
-          <button onClick={onEditArtwork} className="art art-lg group relative h-32 w-32 flex-shrink-0" title="Set playlist cover">
+          <button onClick={onEditArtwork} className="art art-lg group relative h-32 w-32 flex-shrink-0" title="Set playlist cover" aria-label="Set playlist cover">
             {playlist.artwork ? <img src={playlist.artwork} alt="" className="h-full w-full object-cover" /> : <ListMusic size={46} />}
             <span className="absolute inset-x-3 bottom-3 rounded-full bg-[var(--glass-strong)] px-3 py-1 text-[10px] font-semibold text-text-primary opacity-0 backdrop-blur-xl transition group-hover:opacity-100">
               Set cover
@@ -85,7 +85,7 @@ export function PlaylistPage({
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: Math.min(index * 0.018, 0.25), duration: 0.28 }}
-                  className={`row-panel group mb-2 grid grid-cols-[42px_minmax(190px,1fr)_54px_38px] items-center gap-4 rounded-2xl px-4 py-3 lg:grid-cols-[42px_minmax(230px,1fr)_minmax(140px,.7fr)_60px_40px] ${
+                  className={`playlist-row row-panel group mb-2 grid grid-cols-[42px_minmax(190px,1fr)_54px_38px] items-center gap-4 rounded-2xl px-4 py-3 lg:grid-cols-[42px_minmax(230px,1fr)_minmax(140px,.7fr)_60px_40px] ${
                     isActive ? 'row-panel-active' : ''
                   }`}
                 >
@@ -95,16 +95,17 @@ export function PlaylistPage({
                       {track.artwork ? <img className="h-full w-full object-cover" src={track.artwork} alt="" /> : <Disc3 size={19} />}
                     </span>
                     <span className="min-w-0">
-                      <span className="block truncate text-sm font-semibold text-text-primary">{track.title}</span>
+                      <span className="flex items-center gap-1 truncate text-sm font-semibold text-text-primary">{track.title}{track.sourceKind === 'drive' && <Cloud size={12} className="shrink-0 text-accent-light" aria-label="Google Drive track" />}</span>
                       <span className="block truncate text-xs text-text-tertiary">{track.artist}</span>
                     </span>
                   </button>
-                  <span className="hidden truncate text-sm text-text-tertiary lg:block">{track.album}</span>
+                  <span className="playlist-album hidden truncate text-sm text-text-tertiary lg:block">{track.album}</span>
                   <span className="text-xs tabular-nums text-text-muted">{duration(track.duration)}</span>
                   <button
                     onClick={() => onRemoveTrack(track.id)}
                     className="grid h-9 w-9 place-items-center rounded-full text-text-tertiary opacity-0 transition hover:bg-[var(--glass)] hover:text-accent-light group-hover:opacity-100"
                     title="Remove from playlist"
+                    aria-label={`Remove ${track.title} from playlist`}
                   >
                     <Trash2 size={15} />
                   </button>

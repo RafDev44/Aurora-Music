@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { Disc3, Library, ListMusic, Play, Trash2 } from 'lucide-react'
+import { Cloud, Disc3, Library, ListMusic, Play, Trash2 } from 'lucide-react'
 import { usePlayer } from '../hooks/usePlayer'
 import type { Track } from '../types/music'
 
@@ -68,7 +68,7 @@ export function QueuePage({ onOpenLibrary }: { onOpenLibrary: () => void }) {
             </h2>
             <p className="mt-1 truncate text-sm text-text-secondary">{player.currentTrack.artist}</p>
           </div>
-          <button onClick={() => void player.togglePlay()} className="dock-play" title={player.isPlaying ? 'Pause' : 'Play'}>
+          <button onClick={() => void player.togglePlay()} className="dock-play" title={player.isPlaying ? 'Pause' : 'Play'} aria-label={player.isPlaying ? 'Pause' : 'Play'}>
             <Play size={18} fill="currentColor" />
           </button>
         </motion.section>
@@ -82,7 +82,7 @@ export function QueuePage({ onOpenLibrary }: { onOpenLibrary: () => void }) {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.025, duration: 0.3 }}
-              className="row-panel group mb-2 grid grid-cols-[42px_minmax(220px,1fr)_minmax(140px,.7fr)_58px_40px] items-center gap-4 rounded-2xl px-4 py-3"
+              className="queue-row row-panel group mb-2 grid grid-cols-[42px_minmax(220px,1fr)_minmax(140px,.7fr)_58px_40px] items-center gap-4 rounded-2xl px-4 py-3"
             >
               <span className="text-center text-sm tabular-nums text-text-tertiary">{index + 1}</span>
               <button
@@ -91,16 +91,17 @@ export function QueuePage({ onOpenLibrary }: { onOpenLibrary: () => void }) {
               >
                 <Artwork track={track} />
                 <span className="min-w-0">
-                  <span className="block truncate text-sm font-semibold text-text-primary">{track.title}</span>
+                  <span className="flex items-center gap-1 truncate text-sm font-semibold text-text-primary">{track.title}{track.sourceKind === 'drive' && <Cloud size={12} className="shrink-0 text-accent-light" aria-label="Google Drive track" />}</span>
                   <span className="block truncate text-xs text-text-tertiary">{track.artist}</span>
                 </span>
               </button>
-              <span className="truncate text-sm text-text-tertiary">{track.album}</span>
+              <span className="queue-album truncate text-sm text-text-tertiary">{track.album}</span>
               <span className="text-xs tabular-nums text-text-muted">{formatDuration(track.duration)}</span>
               <button
                 onClick={() => removeTrack(track.id)}
                 className="grid h-9 w-9 place-items-center rounded-full text-text-tertiary opacity-0 transition hover:bg-[var(--glass)] hover:text-accent-light group-hover:opacity-100"
                 title="Remove from queue"
+                aria-label={`Remove ${track.title} from queue`}
               >
                 <Trash2 size={15} />
               </button>

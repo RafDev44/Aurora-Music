@@ -1,10 +1,27 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ThemeContext, type ThemeState } from './theme-context'
-import { hexToRgb, isValidHex, mix, normalizeHex, shiftLightness, withAlpha } from './colorUtils'
+import {
+  hexToRgb,
+  isValidHex,
+  mix,
+  normalizeHex,
+  shiftHue,
+  shiftLightness,
+  withAlpha,
+} from './colorUtils'
 
 const STORAGE_KEY = 'aurora:accent'
 const DEFAULT_ACCENT = '#8B5CF6'
-const PRESETS = ['#8B5CF6', '#00D4FF', '#00FF9C', '#FF5CA8', '#FFB84C', '#F43F5E', '#38BDF8', '#A3E635'] as const
+const PRESETS = [
+  '#8B5CF6',
+  '#00D4FF',
+  '#00FF9C',
+  '#FF5CA8',
+  '#FFB84C',
+  '#F43F5E',
+  '#38BDF8',
+  '#A3E635',
+] as const
 
 // Derive every design token from ONE hex and paint them onto <html>.
 // Any component that reads var(--accent), var(--glass), etc. updates automatically.
@@ -38,7 +55,10 @@ function paintTheme(accent: string) {
 
   root.style.setProperty('--gradient-start', gradientStart)
   root.style.setProperty('--gradient-end', gradientEnd)
-  root.style.setProperty('--gradient-conic', `conic-gradient(from 210deg at 50% 50%, ${gradientStart}, ${gradientEnd}, ${gradientStart})`)
+  root.style.setProperty(
+    '--gradient-conic',
+    `conic-gradient(from 210deg at 50% 50%, ${gradientStart}, ${gradientEnd}, ${gradientStart})`,
+  )
 
   root.style.setProperty('--background', background)
   root.style.setProperty('--background-deep', backgroundDeep)
@@ -56,13 +76,29 @@ function paintTheme(accent: string) {
   root.style.setProperty('--text-tertiary', 'rgba(245, 245, 247, 0.5)')
   root.style.setProperty('--text-muted', 'rgba(245, 245, 247, 0.32)')
 
-  root.style.setProperty('--aurora-1', withAlpha(safe, 0.28))
-  root.style.setProperty('--aurora-2', withAlpha(accentLight, 0.22))
-  root.style.setProperty('--aurora-3', withAlpha(accentDark, 0.24))
+  // Keep the selected accent as the anchor, then add complementary hues so
+  // the aurora feels alive without imposing a fixed palette on the user.
+  const auroraOne = shiftHue(safe, -48, 0.12)
+  const auroraTwo = shiftHue(safe, 52, -0.02)
+  const auroraThree = shiftHue(safe, 178, -0.06)
+  const auroraFour = shiftHue(safe, 24, 0.16)
+  root.style.setProperty('--aurora-1', withAlpha(auroraOne, 0.34))
+  root.style.setProperty('--aurora-2', withAlpha(auroraTwo, 0.28))
+  root.style.setProperty('--aurora-3', withAlpha(auroraThree, 0.3))
+  root.style.setProperty('--aurora-4', withAlpha(auroraFour, 0.2))
 
-  root.style.setProperty('--shadow-soft', `0 10px 40px ${withAlpha('#000000', 0.35)}`)
-  root.style.setProperty('--shadow-lift', `0 24px 60px ${withAlpha('#000000', 0.5)}, 0 0 0 1px rgba(255,255,255,0.03)`)
-  root.style.setProperty('--shadow-dock', `0 30px 80px ${withAlpha('#000000', 0.55)}, 0 0 0 1px rgba(255,255,255,0.04)`)
+  root.style.setProperty(
+    '--shadow-soft',
+    `0 10px 40px ${withAlpha('#000000', 0.35)}`,
+  )
+  root.style.setProperty(
+    '--shadow-lift',
+    `0 24px 60px ${withAlpha('#000000', 0.5)}, 0 0 0 1px rgba(255,255,255,0.03)`,
+  )
+  root.style.setProperty(
+    '--shadow-dock',
+    `0 30px 80px ${withAlpha('#000000', 0.55)}, 0 0 0 1px rgba(255,255,255,0.04)`,
+  )
 
   // Set the meta theme-color so the window chrome matches.
   const meta = document.querySelector('meta[name="theme-color"]')
@@ -90,7 +126,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setAccentState(normalizeHex(hex))
   }, [])
 
-  const value = useMemo<ThemeState>(() => ({ accent, setAccent, presets: PRESETS }), [accent, setAccent])
+  const value = useMemo<ThemeState>(
+    () => ({ accent, setAccent, presets: PRESETS }),
+    [accent, setAccent],
+  )
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
 }

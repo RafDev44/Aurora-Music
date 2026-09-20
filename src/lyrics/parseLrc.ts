@@ -2,6 +2,10 @@ import type { LyricLine } from '../types/music'
 
 const timestamp = /\[(\d{1,2}):(\d{2})(?:\.(\d{1,3}))?\]/g
 
+export function isLrcSource(source: string): boolean {
+  return /\[\d{1,3}:\d{2}(?:[.:]\d{1,3})?\]/.test(source)
+}
+
 export function parseLrc(source: string): LyricLine[] {
   const lyrics: LyricLine[] = []
   for (const rawLine of source.replace(/^\uFEFF/, '').split(/\r?\n/)) {

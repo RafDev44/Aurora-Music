@@ -1,9 +1,15 @@
 node_modules/
+
 dist/
+dist-electron/
 build/
 out/
+release/
+
 .cache/
 .vscode/
+
 .env
 .env.*
+
 *.log

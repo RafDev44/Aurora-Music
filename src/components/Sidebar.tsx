@@ -1,7 +1,8 @@
 import { motion } from 'framer-motion'
-import { FolderOpen, ListMusic, Music2, Music4, Plus } from 'lucide-react'
+import { FolderOpen, ListMusic, Music2, Plus } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import type { Playlist } from '../types/music'
+import { AuroraLogo } from './AuroraLogo'
 
 export interface NavItem {
   label: string
@@ -37,8 +38,6 @@ export function Sidebar({
 }: SidebarProps) {
   return (
     <aside className="sidebar">
-      <div className="sidebar-panel" aria-hidden />
-
       {/* Brand */}
       <motion.div
         initial={{ opacity: 0, y: -6 }}
@@ -46,20 +45,7 @@ export function Sidebar({
         transition={{ duration: 0.4, ease: 'easeOut' }}
         className="mb-8 flex items-center gap-3 px-3"
       >
-        <span
-          className="grid h-10 w-10 place-items-center rounded-xl text-accent-foreground shadow-glow"
-          style={{
-            background: 'linear-gradient(135deg, var(--gradient-start), var(--gradient-end))',
-          }}
-        >
-          <Music4 size={20} strokeWidth={2.4} />
-        </span>
-        <div className="min-w-0">
-          <div className="text-[15px] font-semibold tracking-tight leading-none">Aurora</div>
-          <div className="text-[10.5px] font-medium uppercase tracking-[0.16em] text-text-muted mt-1">
-            Music
-          </div>
-        </div>
+        <AuroraLogo size={40} showWordmark />
       </motion.div>
 
       {/* Primary nav */}
@@ -75,6 +61,7 @@ export function Sidebar({
               transition={{ delay: 0.04 * index, duration: 0.3 }}
               whileTap={{ scale: 0.97 }}
               className={`nav-item ${isActive ? 'nav-item-active' : ''}`}
+              aria-current={isActive ? 'page' : undefined}
             >
               <span className="nav-icon">
                 <Icon size={17} strokeWidth={2} />
@@ -95,6 +82,7 @@ export function Sidebar({
             onClick={onCreatePlaylist}
             className="grid h-6 w-6 place-items-center rounded-md text-text-tertiary transition hover:bg-[var(--glass)] hover:text-text-primary"
             title="Create playlist"
+            aria-label="Create playlist"
           >
             <Plus size={14} strokeWidth={2.4} />
           </button>
