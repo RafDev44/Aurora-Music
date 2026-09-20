@@ -110,14 +110,14 @@ Aurora Player
 ![Home Screen](assets/Home-Page.png)
 
 ### Library
-![Library Screen](assets/Lyrics.png)
+![Library Screen](assets/Library.png)
 
 ### Settings
 ![Settings Screen](assets/Settings.png)
 ![Settings Screen](assets/Settings2.png)
 
 ### Lyrics
-![Lyrics Screen](assets/Home-Lyrics.png)
+![Lyrics Screen](assets/Lyrics.png)
 
 ### Queue
 ![Oueue Screen](assets/Queue.png)
