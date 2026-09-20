@@ -110,7 +110,7 @@ Aurora Player
 ![Home Screen](assets/Home-Page.png)
 
 ### Library
-![Library Screen](assets/Library.png)
+![Library Screen](assets/Lyrics.png)
 
 ### Settings
 ![Settings Screen](assets/Settings.png)
