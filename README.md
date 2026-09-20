@@ -103,18 +103,27 @@ Aurora Player
 
 ## 📸 Screenshots
 
-### Home
-![Home Screen](src/Home.png)
+### Loading
+![Loading Screen](assets/Loading-Screen.png)
 
-### Playlist
-![Playlist Screen](src/Playlist.png)
+### Home
+![Home Screen](assets/Home-Page.png)
+
+### Library
+![Library Screen](assets/Library.png)
 
 ### Settings
-![Settings Screen](src/Settings.png)
+![Settings Screen](assets/Settings.png)
+![Settings Screen](assets/Settings2.png)
 
 ### Lyrics
-![Lyrics Screen](src/Lyrics.png)
+![Lyrics Screen](assets/Home-Lyrics.png)
 
+### Queue
+![Oueue Screen](assets/Queue.png)
+
+### Cloud Drive
+![Cloud Drive Screen](assets/Cloud-Drive.png)
 ---
 
 ## ⚙ Installation
@@ -161,9 +170,10 @@ npm run build
 - [x] Modern UI
 - [x] Synced Lyrics
 - [x] Cloud Storage
-- [ ] Equalizer
-- [ ] Audio Visualizer
-- [ ] Mini Player
+- [x] Equalizer
+- [x] Audio Visualizer
+- [x] Mini Player
+- [x] Keyboard Shortcuts
 - [ ] Smart Playlists
 - [ ] Plugin System
 - [ ] Mobile Companion App
