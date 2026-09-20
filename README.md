@@ -2,7 +2,7 @@
 
 > A modern, elegant, and feature-rich desktop music player built with Electron, React, TypeScript, and Tailwind CSS.
 
-![Aurora Banner](assets/banner.png)
+![Aurora Banner](assets/aurora-logo.svg)
 
 ---
 
